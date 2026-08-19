@@ -1,0 +1,27 @@
+# Compiled class files & build directories
+build/
+dist/
+target/
+*.class
+
+# NetBeans private user configurations
+nbproject/private/
+
+# Eclipse / IntelliJ IDEA metadata
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# macOS / OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Agent skills cache
+.agents/skills/
