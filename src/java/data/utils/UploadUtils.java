@@ -1,16 +1,12 @@
 package data.utils;
 
 import jakarta.servlet.http.Part;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.Set;
 import java.util.UUID;
@@ -46,31 +42,7 @@ public final class UploadUtils {
             return null;
         }
         String uniqueName = UUID.randomUUID().toString() + ext;
-
-        if (isSupabaseConfigured()) {
-            String supabaseUrl = uploadToSupabase(filePart, uniqueName);
-            if (supabaseUrl != null) {
-                return supabaseUrl;
-            }
-            LOGGER.log(Level.WARNING, "Upload lên Supabase thất bại, tự động chuyển về lưu trữ cục bộ.");
-        }
-
-        File uploadDir = new File(uploadDirPath);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
-        }
-
-        File runtimeFile = new File(uploadDir, uniqueName);
-        filePart.write(runtimeFile.getAbsolutePath());
-
-        syncToSourceDirectory(runtimeFile, uploadDirPath, uniqueName);
-
-        return uniqueName;
-    }
-
-    private static boolean isSupabaseConfigured() {
-        return Constants.SUPABASE_URL != null && !Constants.SUPABASE_URL.trim().isEmpty()
-            && Constants.SUPABASE_KEY != null && !Constants.SUPABASE_KEY.trim().isEmpty();
+        return uploadToSupabase(filePart, uniqueName);
     }
 
     private static String uploadToSupabase(Part filePart, String fileName) {
@@ -109,41 +81,12 @@ public final class UploadUtils {
                 LOGGER.log(Level.INFO, "Đã upload ảnh thành công lên Supabase Storage: {0}", publicUrl);
                 return publicUrl;
             } else {
-                LOGGER.log(Level.WARNING, "Supabase Storage trả về HTTP {0}: {1}", new Object[]{response.statusCode(), response.body()});
+                LOGGER.log(Level.SEVERE, "Supabase Storage trả về HTTP {0}: {1}", new Object[]{response.statusCode(), response.body()});
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Lỗi khi upload ảnh lên Supabase: {0}", e.getMessage());
+            LOGGER.log(Level.SEVERE, "Lỗi khi upload ảnh lên Supabase: {0}", e.getMessage());
         }
         return null;
-    }
-
-    private static void syncToSourceDirectory(File runtimeFile, String uploadDirPath, String fileName) {
-        try {
-            String buildWebPattern = "build" + File.separator + "web";
-            if (uploadDirPath.contains(buildWebPattern)) {
-                String sourceDirPath = uploadDirPath.replace(buildWebPattern, "web");
-                File sourceDir = new File(sourceDirPath);
-                if (sourceDir.exists() || (sourceDir.getParentFile() != null && sourceDir.getParentFile().exists())) {
-                    sourceDir.mkdirs();
-                    Path targetPath = Paths.get(sourceDirPath, fileName);
-                    Files.copy(runtimeFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-                    return;
-                }
-            }
-
-            File dir = new File(uploadDirPath);
-            for (int i = 0; i < 5 && dir != null; i++) {
-                File candidate = new File(dir, "web" + File.separator + "assets" + File.separator + "uploads" + File.separator + "items");
-                if (candidate.exists() && !candidate.getAbsolutePath().equals(runtimeFile.getParentFile().getAbsolutePath())) {
-                    Path targetPath = Paths.get(candidate.getAbsolutePath(), fileName);
-                    Files.copy(runtimeFile.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-                    return;
-                }
-                dir = dir.getParentFile();
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Không thể đồng bộ file sang source directory: {0}", e.getMessage());
-        }
     }
 
     public static boolean deleteUploadedFile(String fileNameOrUrl, String uploadDirPath) {
@@ -152,51 +95,10 @@ public final class UploadUtils {
         }
 
         String target = fileNameOrUrl.trim();
-
         if (target.startsWith("http://") || target.startsWith("https://")) {
-            if (isSupabaseConfigured() && target.contains(Constants.SUPABASE_BUCKET)) {
-                return deleteFromSupabase(target);
-            }
-            return true;
+            return deleteFromSupabase(target);
         }
-
-        if (uploadDirPath == null || uploadDirPath.trim().isEmpty()) {
-            return false;
-        }
-
-        String cleanFileName = Paths.get(target).getFileName().toString();
-        if (cleanFileName.isEmpty() || cleanFileName.equals(".") || cleanFileName.equals("..")) {
-            return false;
-        }
-
-        boolean deleted = false;
-        try {
-            File runtimeFile = new File(uploadDirPath, cleanFileName);
-            if (runtimeFile.exists()) {
-                deleted = runtimeFile.delete();
-            }
-
-            String buildWebPattern = "build" + File.separator + "web";
-            if (uploadDirPath.contains(buildWebPattern)) {
-                String sourceDirPath = uploadDirPath.replace(buildWebPattern, "web");
-                File sourceFile = new File(sourceDirPath, cleanFileName);
-                if (sourceFile.exists()) {
-                    sourceFile.delete();
-                }
-            }
-
-            File dir = new File(uploadDirPath);
-            for (int i = 0; i < 5 && dir != null; i++) {
-                File candidate = new File(dir, "web" + File.separator + "assets" + File.separator + "uploads" + File.separator + "items" + File.separator + cleanFileName);
-                if (candidate.exists() && !candidate.getAbsolutePath().equals(runtimeFile.getAbsolutePath())) {
-                    candidate.delete();
-                }
-                dir = dir.getParentFile();
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Không thể xóa file ảnh: {0}", e.getMessage());
-        }
-        return deleted;
+        return true;
     }
 
     private static boolean deleteFromSupabase(String publicUrl) {
@@ -223,7 +125,7 @@ public final class UploadUtils {
             HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
             return response.statusCode() >= 200 && response.statusCode() < 300;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Không thể xóa ảnh trên Supabase: {0}", e.getMessage());
+            LOGGER.log(Level.SEVERE, "Không thể xóa ảnh trên Supabase: {0}", e.getMessage());
             return false;
         }
     }
