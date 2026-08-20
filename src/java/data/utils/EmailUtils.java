@@ -25,18 +25,9 @@ public class EmailUtils {
         String senderEmail = Constants.SENDER_EMAIL != null ? Constants.SENDER_EMAIL.trim() : "";
         String senderPassword = Constants.SENDER_PASSWORD != null ? Constants.SENDER_PASSWORD.trim() : "";
 
-        // Nếu chưa cấu hình email hoặc mật khẩu ứng dụng -> Ghi log giả lập (Local dev fallback)
         if (senderEmail.isEmpty() || senderPassword.isEmpty()) {
-            LOGGER.log(Level.INFO,
-                "\n======================================================\n" +
-                "[HUSC ReFind - GIẢ LẬP GỬI EMAIL OTP (LOCAL DEV)]\n" +
-                "Gửi tới : {0} ({1})\n" +
-                "Mã OTP  : {2}\n" +
-                "Hiệu lực: 5 phút\n" +
-                "======================================================",
-                new Object[]{recipientEmail, recipientName, otpCode}
-            );
-            return true;
+            LOGGER.log(Level.SEVERE, "Chưa cấu hình SENDER_EMAIL hoặc SENDER_PASSWORD.");
+            return false;
         }
 
         try {
@@ -65,19 +56,11 @@ public class EmailUtils {
             message.setContent(htmlBody, "text/html; charset=UTF-8");
 
             Transport.send(message);
-            LOGGER.log(Level.INFO, "Đã gửi email OTP thực tế thành công tới: {0}", recipientEmail);
+            LOGGER.log(Level.INFO, "Đã gửi email OTP thành công tới: {0}", recipientEmail);
             return true;
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Không thể gửi email OTP qua SMTP, chuyển về ghi log Console: {0}", e.getMessage());
-            LOGGER.log(Level.INFO,
-                "\n======================================================\n" +
-                "[HUSC ReFind - FALLBACK EMAIL OTP]\n" +
-                "Gửi tới : {0} ({1})\n" +
-                "Mã OTP  : {2}\n" +
-                "======================================================",
-                new Object[]{recipientEmail, recipientName, otpCode}
-            );
-            return true;
+            LOGGER.log(Level.SEVERE, "Lỗi khi gửi email OTP qua SMTP: {0}", e.getMessage());
+            return false;
         }
     }
 
