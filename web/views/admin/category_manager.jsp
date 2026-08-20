@@ -45,28 +45,6 @@
                                         </form>
                                     </div>
 
-                                    <div class="modal fade modal-husc text-start" id="editCatModal${cat.id}" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title"><i class="bi bi-pencil text-primary"></i> Sửa danh mục</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <form action="${pageContext.request.contextPath}/admin/categories" method="POST">
-                                                    <input type="hidden" name="action" value="edit">
-                                                    <input type="hidden" name="id" value="${cat.id}">
-                                                    <div class="modal-body">
-                                                        <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
-                                                        <input type="text" class="form-control form-control-custom" name="name" value="${cat.name}" required>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-husc-outline btn-sm" data-bs-dismiss="modal">Hủy</button>
-                                                        <button type="submit" class="btn btn-husc-primary btn-sm"><i class="bi bi-check2"></i> Xác nhận</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -81,6 +59,33 @@
         </table>
     </div>
 </div>
+
+<c:if test="${not empty categories}">
+    <c:forEach items="${categories}" var="cat">
+        <div class="modal fade modal-husc text-start" id="editCatModal${cat.id}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-pencil text-primary"></i> Sửa danh mục</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="${pageContext.request.contextPath}/admin/categories" method="POST">
+                        <input type="hidden" name="action" value="update">
+                        <input type="hidden" name="id" value="${cat.id}">
+                        <div class="modal-body">
+                            <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control form-control-custom" name="name" value="${cat.name}" required>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-husc-outline btn-sm" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-husc-primary btn-sm"><i class="bi bi-check2"></i> Xác nhận</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </c:forEach>
+</c:if>
 
 <div class="modal fade modal-husc" id="addCategoryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

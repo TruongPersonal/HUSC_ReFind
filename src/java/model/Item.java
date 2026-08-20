@@ -91,6 +91,10 @@ public class Item {
         return HtmlEscaper.escape(title);
     }
 
+    public String getRawTitle() {
+        return title;
+    }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -113,6 +117,10 @@ public class Item {
 
     public String getDescription() {
         return HtmlEscaper.escape(description);
+    }
+
+    public String getRawDescription() {
+        return description;
     }
 
     public void setDescription(String description) {
@@ -165,12 +173,20 @@ public class Item {
         return HtmlEscaper.escape(categoryName);
     }
 
+    public String getRawCategoryName() {
+        return categoryName;
+    }
+
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
     }
 
     public String getLocationName() {
         return HtmlEscaper.escape(locationName);
+    }
+
+    public String getRawLocationName() {
+        return locationName;
     }
 
     public void setLocationName(String locationName) {

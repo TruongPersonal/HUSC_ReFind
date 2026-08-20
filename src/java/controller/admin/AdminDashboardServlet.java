@@ -32,12 +32,12 @@ public class AdminDashboardServlet extends HttpServlet {
         Map<String, Integer> locationStats = new LinkedHashMap<>();
 
         for (Item item : allItems) {
-            String cat = (item.getCategoryName() != null && !item.getCategoryName().isEmpty())
-                    ? item.getCategoryName() : "Khác";
+            String cat = (item.getRawCategoryName() != null && !item.getRawCategoryName().isEmpty())
+                    ? item.getRawCategoryName() : "Khác";
             categoryStats.put(cat, categoryStats.getOrDefault(cat, 0) + 1);
 
-            String loc = (item.getLocationName() != null && !item.getLocationName().isEmpty())
-                    ? item.getLocationName() : "Khác";
+            String loc = (item.getRawLocationName() != null && !item.getRawLocationName().isEmpty())
+                    ? item.getRawLocationName() : "Khác";
             locationStats.put(loc, locationStats.getOrDefault(loc, 0) + 1);
         }
 

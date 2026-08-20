@@ -33,6 +33,10 @@ public class Category {
         return HtmlEscaper.escape(name);
     }
 
+    public String getRawName() {
+        return name;
+    }
+
     public void setName(String name) {
         this.name = name;
     }

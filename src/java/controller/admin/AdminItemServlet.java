@@ -141,13 +141,17 @@ public class AdminItemServlet extends HttpServlet {
                 int locationId = Integer.parseInt(locationIdStr.trim());
                 Item item = itemDao.getItemById(itemId);
                 if (item != null) {
-                    String imageName = item.getImage();
+                    String oldImage = item.getImage();
+                    String imageName = oldImage;
                     if (filePart != null && filePart.getSize() > 0) {
                         String uploadPath = request.getServletContext().getRealPath("/assets/uploads/items");
                         try {
                             String uploaded = UploadUtils.saveUploadedFile(filePart, uploadPath);
                             if (uploaded != null) {
                                 imageName = uploaded;
+                                if (oldImage != null && !oldImage.trim().isEmpty() && !oldImage.equals(uploaded)) {
+                                    UploadUtils.deleteUploadedFile(oldImage, uploadPath);
+                                }
                             }
                         } catch (Exception ignored) {}
                     }
@@ -168,8 +172,19 @@ public class AdminItemServlet extends HttpServlet {
         } else if ("delete".equalsIgnoreCase(action)) {
             String idStr = request.getParameter("id");
             if (idStr != null && !idStr.trim().isEmpty()) {
-                itemDao.deleteItem(Integer.parseInt(idStr.trim()));
-                session.setAttribute("successMessage", "Đã xóa bài viết khỏi hệ thống.");
+                int itemId = Integer.parseInt(idStr.trim());
+                Item item = itemDao.getItemById(itemId);
+                String image = (item != null) ? item.getImage() : null;
+                boolean deleted = itemDao.deleteItem(itemId);
+                if (deleted) {
+                    if (image != null && !image.trim().isEmpty()) {
+                        String uploadPath = request.getServletContext().getRealPath("/assets/uploads/items");
+                        UploadUtils.deleteUploadedFile(image, uploadPath);
+                    }
+                    session.setAttribute("successMessage", "Đã xóa bài viết khỏi hệ thống.");
+                } else {
+                    session.setAttribute("errorMessage", "Xóa bài viết thất bại.");
+                }
             }
         }
 

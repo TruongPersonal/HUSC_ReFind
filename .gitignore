@@ -25,3 +25,11 @@ Thumbs.db
 
 # Agent skills cache
 .agents/skills/
+
+# Environment configurations
+.env
+.env.local
+.env.*.local
+
+# Upload file
+assets/uploads/items/

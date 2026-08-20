@@ -51,7 +51,7 @@
                                                 <i class="bi bi-image fs-2"></i>
                                             </div>
                                             <c:if test="${not empty item.image}">
-                                                <img src="${pageContext.request.contextPath}/assets/uploads/items/${item.image}"
+                                                <img src="${item.image.startsWith('http') ? item.image : pageContext.request.contextPath.concat('/assets/uploads/items/').concat(item.image)}"
                                                     alt="${item.title}"
                                                     style="position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover;"
                                                     onerror="this.style.display='none';">

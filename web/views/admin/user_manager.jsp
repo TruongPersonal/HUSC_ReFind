@@ -165,66 +165,6 @@
                                             </c:otherwise>
                                         </c:choose>
                                     </div>
-
-                                    <div class="modal fade modal-husc text-start" id="editUserModal${u.id}" tabindex="-1" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title"><i class="bi bi-person-gear text-primary"></i> Sửa người dùng</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-
-                                                <form action="${pageContext.request.contextPath}/admin/users" method="POST">
-                                                    <input type="hidden" name="action" value="update">
-                                                    <input type="hidden" name="id" value="${u.id}">
-
-                                                    <div class="modal-body">
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Họ tên <span class="text-danger">*</span></label>
-                                                            <input type="text" class="form-control form-control-custom" name="name" value="${u.name}" required>
-                                                        </div>
-
-                                                        <div class="row g-3 mb-3">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Mã người dùng <span class="text-danger">*</span></label>
-                                                                <input type="text" class="form-control form-control-custom" name="code" value="${u.code}" required>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Vai trò <span class="text-danger">*</span></label>
-                                                                <select class="form-select form-select-custom" name="role" required>
-                                                                    <option value="student" ${u.role == 'student' ? 'selected' : ''}>Sinh viên</option>
-                                                                    <option value="admin" ${u.role == 'admin' ? 'selected' : ''}>Quản trị viên</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="row g-3 mb-3">
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">Email</label>
-                                                                <input type="email" class="form-control form-control-custom" name="email" value="${u.email}">
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label">SĐT</label>
-                                                                <input type="tel" class="form-control form-control-custom" name="phone" value="${u.phone}">
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="mb-2">
-                                                            <label class="form-label">Mật khẩu mới</label>
-                                                            <input type="password" class="form-control form-control-custom" name="password" placeholder="Để trống nếu không muốn đổi mật khẩu">
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-husc-outline btn-sm" data-bs-dismiss="modal">Hủy</button>
-                                                        <button type="submit" class="btn btn-husc-primary btn-sm">
-                                                            <i class="bi bi-check2"></i> Xác nhận
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </td>
                             </tr>
                         </c:forEach>
@@ -242,6 +182,70 @@
         </table>
     </div>
 </div>
+
+<c:if test="${not empty users}">
+    <c:forEach items="${users}" var="u">
+        <div class="modal fade modal-husc text-start" id="editUserModal${u.id}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-person-gear text-primary"></i> Sửa người dùng</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <form action="${pageContext.request.contextPath}/admin/users" method="POST">
+                        <input type="hidden" name="action" value="update">
+                        <input type="hidden" name="id" value="${u.id}">
+
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Họ tên <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-custom" name="name" value="${u.name}" required>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Mã người dùng <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control form-control-custom" name="code" value="${u.code}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Vai trò <span class="text-danger">*</span></label>
+                                    <select class="form-select form-select-custom" name="role" required>
+                                        <option value="student" ${u.role == 'student' ? 'selected' : ''}>Sinh viên</option>
+                                        <option value="admin" ${u.role == 'admin' ? 'selected' : ''}>Quản trị viên</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control form-control-custom" name="email" value="${u.email}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">SĐT</label>
+                                    <input type="tel" class="form-control form-control-custom" name="phone" value="${u.phone}">
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label">Mật khẩu mới</label>
+                                <input type="password" class="form-control form-control-custom" name="password" placeholder="Để trống nếu không muốn đổi mật khẩu">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-husc-outline btn-sm" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-husc-primary btn-sm">
+                                <i class="bi bi-check2"></i> Xác nhận
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </c:forEach>
+</c:if>
 
 <div class="modal fade modal-husc text-start" id="addUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

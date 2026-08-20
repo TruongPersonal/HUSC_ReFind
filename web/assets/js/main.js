@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initBookmarkButtons();
   initPasswordToggles();
   initNavbarScroll();
+  initAdminSidebar();
+  initOtpCooldown();
 });
 
 function initCsrfProtection() {
@@ -322,3 +324,47 @@ function initPasswordToggles() {
     });
   });
 }
+
+function initAdminSidebar() {
+  const toggleBtn = document.getElementById('toggleAdminSidebar');
+  const sidebar = document.getElementById('adminSidebar');
+  const backdrop = document.getElementById('adminSidebarBackdrop');
+
+  if (toggleBtn && sidebar && backdrop) {
+    toggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('show');
+      backdrop.classList.toggle('show');
+    });
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.remove('show');
+      backdrop.classList.remove('show');
+    });
+  }
+}
+
+function initOtpCooldown() {
+  const resendBtn = document.getElementById('resendOtpBtn');
+  const cooldownSpan = document.getElementById('cooldownTimer');
+  if (!resendBtn || !cooldownSpan) return;
+
+  let cooldownSecs = parseInt(resendBtn.getAttribute('data-cooldown') || '0', 10);
+  if (isNaN(cooldownSecs) || cooldownSecs < 0) cooldownSecs = 0;
+
+  function updateCooldown() {
+    if (cooldownSecs > 0) {
+      resendBtn.disabled = true;
+      resendBtn.style.opacity = '0.5';
+      resendBtn.style.cursor = 'not-allowed';
+      cooldownSpan.textContent = '(' + cooldownSecs + 's)';
+      cooldownSecs--;
+      setTimeout(updateCooldown, 1000);
+    } else {
+      resendBtn.disabled = false;
+      resendBtn.style.opacity = '1';
+      resendBtn.style.cursor = 'pointer';
+      cooldownSpan.textContent = '';
+    }
+  }
+  updateCooldown();
+}
+

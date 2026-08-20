@@ -69,7 +69,8 @@ public class EditPostServlet extends HttpServlet {
             return;
         }
 
-        String imageName = existingItem.getImage();
+        String oldImage = existingItem.getImage();
+        String imageName = oldImage;
 
         if (filePart != null && filePart.getSize() > 0) {
             String uploadPath = request.getServletContext().getRealPath("/assets/uploads/items");
@@ -77,6 +78,9 @@ public class EditPostServlet extends HttpServlet {
                 String uploaded = UploadUtils.saveUploadedFile(filePart, uploadPath);
                 if (uploaded != null) {
                     imageName = uploaded;
+                    if (oldImage != null && !oldImage.trim().isEmpty() && !oldImage.equals(uploaded)) {
+                        UploadUtils.deleteUploadedFile(oldImage, uploadPath);
+                    }
                 }
             } catch (Exception ignored) {}
         }

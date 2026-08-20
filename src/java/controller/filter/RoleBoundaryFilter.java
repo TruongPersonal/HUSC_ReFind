@@ -38,7 +38,7 @@ public class RoleBoundaryFilter implements Filter {
 
         String path = req.getServletPath();
 
-        if (path.startsWith("/assets/") || path.startsWith("/css/") || path.startsWith("/js/") || path.startsWith("/img/")) {
+        if (path.startsWith("/assets/") || path.startsWith("/css/") || path.startsWith("/js/") || path.startsWith("/img/") || path.startsWith("/api/") || path.equals("/chatbot")) {
             chain.doFilter(request, response);
             return;
         }

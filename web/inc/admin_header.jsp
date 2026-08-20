@@ -22,7 +22,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css?v=20260820_v6">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
 </head>
 <body class="admin-page">
 

@@ -39,9 +39,18 @@ public class DeletePostServlet extends HttpServlet {
         Item item = itemDao.getItemById(itemId);
 
         if (item != null) {
-            if (currentUser.isAdmin() || item.getUserId() == currentUser.getId()) {
-                itemDao.deleteItem(itemId);
-                session.setAttribute("successMessage", "Xóa bài viết thành công.");
+            if (currentUser.isAdmin() || (item.getUserId() != null && item.getUserId().equals(currentUser.getId()))) {
+                String image = item.getImage();
+                boolean deleted = itemDao.deleteItem(itemId);
+                if (deleted) {
+                    if (image != null && !image.trim().isEmpty()) {
+                        String uploadPath = request.getServletContext().getRealPath("/assets/uploads/items");
+                        data.utils.UploadUtils.deleteUploadedFile(image, uploadPath);
+                    }
+                    session.setAttribute("successMessage", "Xóa bài viết thành công.");
+                } else {
+                    session.setAttribute("errorMessage", "Xóa bài viết thất bại.");
+                }
             } else {
                 session.setAttribute("errorMessage", "Bạn không có quyền xóa bài viết này.");
             }

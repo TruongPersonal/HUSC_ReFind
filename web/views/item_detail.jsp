@@ -19,7 +19,7 @@
                 <div style="width: 100%; height: 320px; background-color: #0f172a; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden;">
                     <c:choose>
                         <c:when test="${not empty item.image}">
-                            <img src="${pageContext.request.contextPath}/assets/uploads/items/${item.image}"
+                            <img src="${item.image.startsWith('http') ? item.image : pageContext.request.contextPath.concat('/assets/uploads/items/').concat(item.image)}"
                                  alt="${item.title}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain;"
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                             <div style="display: none; color: var(--husc-muted); font-size: 3.5rem;">
@@ -37,7 +37,7 @@
                         <c:choose>
                             <c:when test="${item.status == 1}"><span class="badge-status badge-lost"><i class="bi bi-search"></i> Đang tìm</span></c:when>
                             <c:when test="${item.status == 2}"><span class="badge-status badge-holding"><i class="bi bi-shield-check"></i> Đang giữ</span></c:when>
-                            <c:when test="${item.status == 0}"><span class="badge-status badge-returned"><i class="bi bi-check2-circle"></i> Đã trả</span></c:when>
+                            <c:when test="${item.status == 0}"><span class="badge-status badge-returned"><i class="bi bi-check2-circle"></i> Đã nhận</span></c:when>
                         </c:choose>
                     </div>
                 </div>
@@ -113,10 +113,10 @@
                     </c:if>
 
                     <c:if test="${not empty sessionScope.user && sessionScope.user.id == item.userId && item.status != 0}">
-                        <form action="${pageContext.request.contextPath}/close-item" method="POST" onsubmit="return confirm('Xác nhận đồ vật đã được trao trả xong?');" style="display: inline;">
+                        <form action="${pageContext.request.contextPath}/close-item" method="POST" onsubmit="return confirm('Xác nhận bạn đã nhận lại được đồ thất lạc này?');" style="display: inline;">
                             <input type="hidden" name="id" value="${item.id}">
                             <button type="submit" class="btn btn-success btn-sm fw-semibold">
-                                <i class="bi bi-check2 me-1"></i> Đã trả
+                                <i class="bi bi-check2 me-1"></i> Đã nhận
                             </button>
                         </form>
                     </c:if>
@@ -209,7 +209,7 @@
                         <div class="p-3 border rounded-3 bg-white h-100 d-flex flex-column shadow-xs">
                             <div class="d-flex gap-3">
                                 <div style="width: 60px; height: 60px; border-radius: var(--radius-sm); overflow: hidden; background-color: var(--husc-dark); flex-shrink: 0;">
-                                    <img src="${pageContext.request.contextPath}/assets/uploads/items/${matched.image}"
+                                    <img src="${matched.image.startsWith('http') ? matched.image : pageContext.request.contextPath.concat('/assets/uploads/items/').concat(matched.image)}"
                                          alt="${matched.title}" style="width: 100%; height: 100%; object-fit: cover;"
                                          onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--husc-muted);\'><i class=\'bi bi-image\'></i></div>';">
                                 </div>

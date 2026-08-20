@@ -41,7 +41,7 @@
                     </a>
                     <form action="${pageContext.request.contextPath}/verify-otp" method="POST" class="d-inline m-0 p-0" id="resendOtpForm">
                         <input type="hidden" name="action" value="resend">
-                        <button type="submit" id="resendOtpBtn" class="btn btn-link fw-bold p-0 border-0 align-baseline text-primary" style="font-size: 0.85rem;">
+                        <button type="submit" id="resendOtpBtn" data-cooldown="${cooldownSeconds != null ? cooldownSeconds : 0}" class="btn btn-link fw-bold p-0 border-0 align-baseline text-primary" style="font-size: 0.85rem;">
                             <span>Gửi lại</span> <span id="cooldownTimer"></span>
                         </button>
                     </form>
@@ -50,31 +50,5 @@
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const resendBtn = document.getElementById('resendOtpBtn');
-    const cooldownSpan = document.getElementById('cooldownTimer');
-    var cooldownSecs = parseInt('${cooldownSeconds != null ? cooldownSeconds : 0}', 10);
-    if (isNaN(cooldownSecs) || cooldownSecs < 0) cooldownSecs = 0;
-
-    function updateCooldown() {
-        if (cooldownSecs > 0) {
-            resendBtn.disabled = true;
-            resendBtn.style.opacity = '0.5';
-            resendBtn.style.cursor = 'not-allowed';
-            cooldownSpan.textContent = '(' + cooldownSecs + 's)';
-            cooldownSecs--;
-            setTimeout(updateCooldown, 1000);
-        } else {
-            resendBtn.disabled = false;
-            resendBtn.style.opacity = '1';
-            resendBtn.style.cursor = 'pointer';
-            cooldownSpan.textContent = '';
-        }
-    }
-    updateCooldown();
-});
-</script>
 
 <jsp:include page="/inc/footer.jsp" />

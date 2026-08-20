@@ -55,12 +55,12 @@ public class SavedItemImpl implements SavedItemDao {
     public List<Item> getSavedItemsByUserId(int userId) {
         List<Item> list = new ArrayList<>();
         String sql = "SELECT i.*, c.name AS category_name, l.name AS location_name, " +
-                     "u.name AS author_name, u.phone AS author_phone, u.code AS author_code, u.email AS author_email " +
+                     "u.name AS author_name, u.phone AS author_phone, u.code AS author_code, u.email AS author_email, u.role AS author_role " +
                      "FROM saved_items s " +
                      "JOIN items i ON s.item_id = i.id " +
                      "JOIN categories c ON i.category_id = c.id " +
                      "JOIN locations l ON i.location_id = l.id " +
-                     "JOIN users u ON i.user_id = u.id " +
+                     "LEFT JOIN users u ON i.user_id = u.id " +
                      "WHERE s.user_id = ? " +
                      "ORDER BY s.created_at DESC";
         try (Connection con = MySQLDriver.getConnection();

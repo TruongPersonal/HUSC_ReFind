@@ -6,7 +6,7 @@
     <div class="item-card-img-wrapper">
         <c:choose>
             <c:when test="${not empty item.image}">
-                <img src="${pageContext.request.contextPath}/assets/uploads/items/${item.image}"
+                <img src="${item.image.startsWith('http') ? item.image : pageContext.request.contextPath.concat('/assets/uploads/items/').concat(item.image)}"
                      alt="${item.title}" class="item-card-img" loading="lazy"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="img-placeholder-svg" style="display: none;">

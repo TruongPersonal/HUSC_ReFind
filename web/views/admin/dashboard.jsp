@@ -66,7 +66,7 @@
                 </h6>
             </div>
             <div class="position-relative d-flex align-items-center justify-content-center" style="min-height: 260px;">
-                <canvas id="statusChart"></canvas>
+                <canvas id="statusChart" data-pending="${pendingLost}" data-holding="${holdingCabinet}" data-returned="${returnedItems}" data-total="${totalItems}"></canvas>
             </div>
         </div>
     </div>
@@ -80,6 +80,11 @@
                 <span class="small text-muted">Số lượng</span>
             </div>
             <div class="position-relative" style="min-height: 260px;">
+                <div id="categoryChartData" class="d-none">
+                    <c:forEach items="${categoryStats}" var="entry">
+                        <span data-label="${entry.key}" data-value="${entry.value}"></span>
+                    </c:forEach>
+                </div>
                 <canvas id="categoryChart"></canvas>
             </div>
         </div>
@@ -93,143 +98,15 @@
         </h6>
         <span class="small text-muted">Các vị trí thường xuyên thất lạc</span>
     </div>
-    <div class="position-relative" style="min-height: 280px;">
+    <div class="position-relative" style="min-height: ${not empty locationStats && locationStats.size() > 6 ? (locationStats.size() * 32 + 60) : 340}px;">
+        <div id="locationChartData" class="d-none">
+            <c:forEach items="${locationStats}" var="entry">
+                <span data-label="${entry.key}" data-value="${entry.value}"></span>
+            </c:forEach>
+        </div>
         <canvas id="locationChart"></canvas>
     </div>
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. Biểu đồ tròn: Trạng thái xử lý
-    const statusCtx = document.getElementById('statusChart');
-    if (statusCtx) {
-        new Chart(statusCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Đang tìm', 'Đang giữ', 'Đã trả'],
-                datasets: [{
-                    data: [${pendingLost}, ${holdingCabinet}, ${returnedItems}],
-                    backgroundColor: ['#DC2626', '#D97706', '#059669'],
-                    borderWidth: 2,
-                    borderColor: '#FFFFFF'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            font: { family: 'Be Vietnam Pro', size: 13, weight: '500' },
-                            padding: 16,
-                            usePointStyle: true
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const total = ${totalItems > 0 ? totalItems : 1};
-                                const value = context.raw || 0;
-                                const percentage = Math.round((value / total) * 100);
-                                return ' ' + context.label + ': ' + value + ' tin (' + percentage + '%)';
-                            }
-                        }
-                    }
-                },
-                cutout: '65%'
-            }
-        });
-    }
-
-    // 2. Biểu đồ cột: Danh mục
-    const categoryCtx = document.getElementById('categoryChart');
-    if (categoryCtx) {
-        new Chart(categoryCtx, {
-            type: 'bar',
-            data: {
-                labels: [
-                    <c:forEach items="${categoryStats}" var="entry" varStatus="loop">
-                        '${entry.key}'${!loop.last ? ',' : ''}
-                    </c:forEach>
-                ],
-                datasets: [{
-                    label: 'Số lượng',
-                    data: [
-                        <c:forEach items="${categoryStats}" var="entry" varStatus="loop">
-                            ${entry.value}${!loop.last ? ',' : ''}
-                        </c:forEach>
-                    ],
-                    backgroundColor: '#1E3A8A',
-                    borderRadius: 6,
-                    maxBarThickness: 42
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { stepSize: 1, precision: 0 },
-                        grid: { color: '#E2E8F0' }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { family: 'Be Vietnam Pro', size: 12 } }
-                    }
-                }
-            }
-        });
-    }
-
-    // 3. Biểu đồ cột: Khu vực
-    const locationCtx = document.getElementById('locationChart');
-    if (locationCtx) {
-        new Chart(locationCtx, {
-            type: 'bar',
-            data: {
-                labels: [
-                    <c:forEach items="${locationStats}" var="entry" varStatus="loop">
-                        '${entry.key}'${!loop.last ? ',' : ''}
-                    </c:forEach>
-                ],
-                datasets: [{
-                    label: 'Số lượng',
-                    data: [
-                        <c:forEach items="${locationStats}" var="entry" varStatus="loop">
-                            ${entry.value}${!loop.last ? ',' : ''}
-                        </c:forEach>
-                    ],
-                    backgroundColor: '#2563EB',
-                    borderRadius: 6,
-                    maxBarThickness: 48
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { stepSize: 1, precision: 0 },
-                        grid: { color: '#E2E8F0' }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { family: 'Be Vietnam Pro', size: 12 } }
-                    }
-                }
-            }
-        });
-    }
-});
-</script>
-
+<script src="${pageContext.request.contextPath}/assets/js/dashboard.js"></script>
 <jsp:include page="/inc/admin_footer.jsp" />

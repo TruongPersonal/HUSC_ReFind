@@ -36,6 +36,7 @@ public class AdminLocationServlet extends HttpServlet {
             String name = request.getParameter("name");
             if (name != null && !name.trim().isEmpty()) {
                 locationDao.insertLocation(name.trim());
+                request.getServletContext().setAttribute("globalLocations", locationDao.allLocations());
                 session.setAttribute("successMessage", "Thêm địa điểm mới thành công!");
             }
         } else if ("update".equalsIgnoreCase(action)) {
@@ -43,6 +44,7 @@ public class AdminLocationServlet extends HttpServlet {
             String name = request.getParameter("name");
             if (idStr != null && name != null && !name.trim().isEmpty()) {
                 locationDao.updateLocation(Integer.parseInt(idStr.trim()), name.trim());
+                request.getServletContext().setAttribute("globalLocations", locationDao.allLocations());
                 session.setAttribute("successMessage", "Cập nhật địa điểm thành công!");
             }
         } else if ("delete".equalsIgnoreCase(action)) {
@@ -51,6 +53,7 @@ public class AdminLocationServlet extends HttpServlet {
                 try {
                     boolean ok = locationDao.deleteLocation(Integer.parseInt(idStr.trim()));
                     if (ok) {
+                        request.getServletContext().setAttribute("globalLocations", locationDao.allLocations());
                         session.setAttribute("successMessage", "Xóa địa điểm thành công.");
                     } else {
                         session.setAttribute("errorMessage", "Không thể xóa địa điểm đang có bài viết liên kết.");

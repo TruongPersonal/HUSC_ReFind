@@ -56,7 +56,9 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/main.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/chatbot.js"></script>
 
-<script src="${pageContext.request.contextPath}/assets/js/main.js?v=20260819_v10"></script>
+<jsp:include page="/inc/chatbot.jsp" />
 </body>
 </html>

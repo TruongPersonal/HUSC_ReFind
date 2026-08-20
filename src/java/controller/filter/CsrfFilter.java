@@ -33,6 +33,12 @@ public class CsrfFilter implements Filter {
             session.setAttribute("csrfToken", token);
         }
 
+        String path = req.getServletPath();
+        if (path != null && (path.startsWith("/api/chatbot") || path.startsWith("/chatbot"))) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         if ("POST".equalsIgnoreCase(req.getMethod())) {
             String submitted = req.getHeader("X-CSRF-Token");
             if (submitted == null || submitted.isEmpty()) submitted = req.getParameter("csrf_token");

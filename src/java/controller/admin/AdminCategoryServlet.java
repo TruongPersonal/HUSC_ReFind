@@ -36,6 +36,7 @@ public class AdminCategoryServlet extends HttpServlet {
             String name = request.getParameter("name");
             if (name != null && !name.trim().isEmpty()) {
                 categoryDao.insertCategory(name.trim());
+                request.getServletContext().setAttribute("globalCategories", categoryDao.allCategories());
                 session.setAttribute("successMessage", "Thêm danh mục mới thành công!");
             }
         } else if ("update".equalsIgnoreCase(action)) {
@@ -43,6 +44,7 @@ public class AdminCategoryServlet extends HttpServlet {
             String name = request.getParameter("name");
             if (idStr != null && name != null && !name.trim().isEmpty()) {
                 categoryDao.updateCategory(Integer.parseInt(idStr.trim()), name.trim());
+                request.getServletContext().setAttribute("globalCategories", categoryDao.allCategories());
                 session.setAttribute("successMessage", "Cập nhật danh mục thành công!");
             }
         } else if ("delete".equalsIgnoreCase(action)) {
@@ -51,6 +53,7 @@ public class AdminCategoryServlet extends HttpServlet {
                 try {
                     boolean ok = categoryDao.deleteCategory(Integer.parseInt(idStr.trim()));
                     if (ok) {
+                        request.getServletContext().setAttribute("globalCategories", categoryDao.allCategories());
                         session.setAttribute("successMessage", "Xóa danh mục thành công.");
                     } else {
                         session.setAttribute("errorMessage", "Không thể xóa danh mục đang có bài viết liên kết.");

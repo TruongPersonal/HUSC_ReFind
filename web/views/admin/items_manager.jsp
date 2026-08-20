@@ -79,7 +79,7 @@
                                             <i class="bi bi-image fs-4"></i>
                                         </div>
 
-                                        <img src="${pageContext.request.contextPath}/assets/uploads/items/${item.image}"
+                                        <img src="${item.image.startsWith('http') ? item.image : pageContext.request.contextPath.concat('/assets/uploads/items/').concat(item.image)}"
                                              alt="${item.title}" class="position-relative w-100 h-100" style="object-fit: cover; z-index: 1;"
                                              onerror="this.style.display='none';">
 
@@ -180,101 +180,6 @@
                                     </div>
                                 </td>
                             </tr>
-
-                            <c:if test="${item.status == 1}">
-                                <div class="modal fade modal-husc text-start" id="holdModal${item.id}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title"><i class="bi bi-box-arrow-in-down text-warning"></i> Tiếp nhận đồ</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <form action="${pageContext.request.contextPath}/admin/items" method="POST">
-                                                <input type="hidden" name="action" value="hold_in_cabinet">
-                                                <input type="hidden" name="id" value="${item.id}">
-                                                <div class="modal-body">
-                                                    <p class="small text-muted mb-3">Đồ vật: <strong class="text-dark">${item.title}</strong> (Đăng bởi: ${item.authorName})</p>
-                                                    <label class="form-label">Ghi chú <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control form-control-custom" name="admin_note"
-                                                           placeholder="Ví dụ: Phòng trực..." value="Phòng trực" required>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-husc-outline btn-sm" data-bs-dismiss="modal">Hủy</button>
-                                                    <button type="submit" class="btn btn-warning btn-sm fw-semibold">Xác nhận</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </c:if>
-
-                            <div class="modal fade modal-husc text-start" id="editModal${item.id}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title"><i class="bi bi-pencil text-primary"></i> Sửa thông tin đồ</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <form action="${pageContext.request.contextPath}/admin/items" method="POST" enctype="multipart/form-data">
-                                            <input type="hidden" name="action" value="update_item">
-                                            <input type="hidden" name="id" value="${item.id}">
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Tên đồ vật <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control form-control-custom" name="title" value="${item.title}" required>
-                                                </div>
-                                                <div class="row g-3 mb-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Danh mục <span class="text-danger">*</span></label>
-                                                        <select class="form-select form-select-custom" name="category_id" required>
-                                                            <c:forEach items="${categories}" var="cat">
-                                                                <option value="${cat.id}" ${item.categoryId == cat.id ? 'selected' : ''}>${cat.name}</option>
-                                                            </c:forEach>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Khu vực <span class="text-danger">*</span></label>
-                                                        <select class="form-select form-select-custom" name="location_id" required>
-                                                            <c:forEach items="${locations}" var="loc">
-                                                                <option value="${loc.id}" ${item.locationId == loc.id ? 'selected' : ''}>${loc.name}</option>
-                                                            </c:forEach>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Mô tả</label>
-                                                    <textarea class="form-control form-control-custom" name="description" rows="3">${item.description}</textarea>
-                                                </div>
-                                                <c:choose>
-                                                    <c:when test="${item.status != 1}">
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Ghi chú</label>
-                                                            <input type="text" class="form-control form-control-custom" name="admin_note" value="${not empty item.adminNote ? item.adminNote : 'Phòng trực'}">
-                                                        </div>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <input type="hidden" name="admin_note" value="${item.adminNote}">
-                                                    </c:otherwise>
-                                                </c:choose>
-                                                <div class="mb-2">
-                                                    <label class="form-label">Ảnh mới</label>
-                                                    <div class="image-dropzone py-3">
-                                                        <div class="dropzone-prompt text-center">
-                                                            <i class="bi bi-camera fs-3 text-muted d-block mb-1"></i>
-                                                            <div class="small fw-semibold text-dark">Bấm hoặc kéo thả ảnh vào đây</div>
-                                                        </div>
-                                                        <input type="file" name="image" accept="image/*" class="d-none input-image-preview">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-husc-outline btn-sm" data-bs-dismiss="modal">Hủy</button>
-                                                <button type="submit" class="btn btn-husc-primary btn-sm"><i class="bi bi-check2"></i> Xác nhận</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
                         </c:forEach>
                     </c:when>
                     <c:otherwise>
@@ -290,6 +195,105 @@
         </table>
     </div>
 </div>
+
+<c:if test="${not empty items}">
+    <c:forEach items="${items}" var="item">
+        <c:if test="${item.status == 1}">
+            <div class="modal fade modal-husc text-start" id="holdModal${item.id}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title"><i class="bi bi-box-arrow-in-down text-warning"></i> Tiếp nhận đồ</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="${pageContext.request.contextPath}/admin/items" method="POST">
+                            <input type="hidden" name="action" value="hold_in_cabinet">
+                            <input type="hidden" name="id" value="${item.id}">
+                            <div class="modal-body">
+                                <p class="small text-muted mb-3">Đồ vật: <strong class="text-dark">${item.title}</strong> (Đăng bởi: ${item.authorName})</p>
+                                <label class="form-label">Ghi chú <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-custom" name="admin_note"
+                                       placeholder="Ví dụ: Phòng trực..." value="Phòng trực" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-husc-outline btn-sm" data-bs-dismiss="modal">Hủy</button>
+                                <button type="submit" class="btn btn-warning btn-sm fw-semibold">Xác nhận</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </c:if>
+
+        <div class="modal fade modal-husc text-start" id="editModal${item.id}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-pencil text-primary"></i> Sửa thông tin đồ</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="${pageContext.request.contextPath}/admin/items" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="update_item">
+                        <input type="hidden" name="id" value="${item.id}">
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label">Tên đồ vật <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-custom" name="title" value="${item.title}" required>
+                            </div>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Danh mục <span class="text-danger">*</span></label>
+                                    <select class="form-select form-select-custom" name="category_id" required>
+                                        <c:forEach items="${categories}" var="cat">
+                                            <option value="${cat.id}" ${item.categoryId == cat.id ? 'selected' : ''}>${cat.name}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Khu vực <span class="text-danger">*</span></label>
+                                    <select class="form-select form-select-custom" name="location_id" required>
+                                        <c:forEach items="${locations}" var="loc">
+                                            <option value="${loc.id}" ${item.locationId == loc.id ? 'selected' : ''}>${loc.name}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mô tả</label>
+                                <textarea class="form-control form-control-custom" name="description" rows="3">${item.description}</textarea>
+                            </div>
+                            <c:choose>
+                                <c:when test="${item.status != 1}">
+                                    <div class="mb-3">
+                                        <label class="form-label">Ghi chú</label>
+                                        <input type="text" class="form-control form-control-custom" name="admin_note" value="${not empty item.adminNote ? item.adminNote : 'Phòng trực'}">
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <input type="hidden" name="admin_note" value="${item.adminNote}">
+                                </c:otherwise>
+                            </c:choose>
+                            <div class="mb-2">
+                                <label class="form-label">Ảnh mới</label>
+                                <div class="image-dropzone py-3">
+                                    <div class="dropzone-prompt text-center">
+                                        <i class="bi bi-camera fs-3 text-muted d-block mb-1"></i>
+                                        <div class="small fw-semibold text-dark">Bấm hoặc kéo thả ảnh vào đây</div>
+                                    </div>
+                                    <input type="file" name="image" accept="image/*" class="d-none input-image-preview">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-husc-outline btn-sm" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-husc-primary btn-sm"><i class="bi bi-check2"></i> Xác nhận</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </c:forEach>
+</c:if>
 
 <div class="modal fade modal-husc" id="addFoundModal" tabindex="-1" aria-labelledby="addFoundModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
