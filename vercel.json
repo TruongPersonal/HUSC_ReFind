@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "https://huscrefind.onrender.com/$1"
+    }
+  ]
+}
