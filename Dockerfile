@@ -1,4 +1,3 @@
-# Stage 1: Build the WAR file using Ant & Tomcat 10 Libraries
 FROM tomcat:10.1-jdk21-temurin AS builder
 
 RUN apt-get update && apt-get install -y ant && rm -rf /var/lib/apt/lists/*
