@@ -7,7 +7,13 @@ import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,6 +21,9 @@ import java.util.logging.Logger;
 public class EmailUtils {
     private static final Logger LOGGER = Logger.getLogger(EmailUtils.class.getName());
     private static final SecureRandom RANDOM = new SecureRandom();
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
 
     public static String generateOtp() {
         int otp = 100000 + RANDOM.nextInt(900000);
@@ -22,14 +31,70 @@ public class EmailUtils {
     }
 
     public static boolean sendOtpEmail(String recipientEmail, String recipientName, String otpCode) {
+        String safeName = (recipientName != null && !recipientName.trim().isEmpty()) ? recipientName.trim() : "bạn";
+        String htmlBody = buildOtpEmailHtml(safeName, otpCode);
+        String subject = "[HUSC ReFind] Mã xác thực OTP đăng ký tài khoản: " + otpCode;
+
+        // 1. Ưu tiên gửi qua Brevo REST API v3 (HTTPS cổng 443 - Siêu nhanh, không bị chặn)
+        String brevoApiKey = Constants.BREVO_API_KEY != null ? Constants.BREVO_API_KEY.trim() : "";
+        if (!brevoApiKey.isEmpty()) {
+            boolean sent = sendViaBrevoApi(recipientEmail, safeName, subject, htmlBody, brevoApiKey);
+            if (sent) {
+                return true;
+            }
+            LOGGER.log(Level.WARNING, "Gửi qua Brevo API thất bại, thử chuyển sang SMTP.");
+        }
+
+        // 2. Gửi qua SMTP (Brevo SMTP / Generic SMTP fallback)
         String senderEmail = Constants.SENDER_EMAIL != null ? Constants.SENDER_EMAIL.trim() : "";
         String senderPassword = Constants.SENDER_PASSWORD != null ? Constants.SENDER_PASSWORD.trim() : "";
 
         if (senderEmail.isEmpty() || senderPassword.isEmpty()) {
-            LOGGER.log(Level.SEVERE, "Chưa cấu hình SENDER_EMAIL hoặc SENDER_PASSWORD.");
+            LOGGER.log(Level.SEVERE, "Chưa cấu hình BREVO_API_KEY hoặc SENDER_PASSWORD.");
             return false;
         }
 
+        return sendViaSmtp(recipientEmail, safeName, subject, htmlBody, senderEmail, senderPassword);
+    }
+
+    private static boolean sendViaBrevoApi(String recipientEmail, String recipientName, String subject, String htmlContent, String apiKey) {
+        try {
+            String senderName = Constants.SENDER_NAME != null ? Constants.SENDER_NAME.trim() : "HUSC ReFind";
+            String senderEmail = Constants.SENDER_EMAIL != null ? Constants.SENDER_EMAIL.trim() : "noreply.huscrefind@gmail.com";
+
+            StringBuilder json = new StringBuilder();
+            json.append("{")
+                .append("\"sender\":{\"name\":\"").append(escapeJson(senderName)).append("\",\"email\":\"").append(escapeJson(senderEmail)).append("\"},")
+                .append("\"to\":[{\"email\":\"").append(escapeJson(recipientEmail)).append("\",\"name\":\"").append(escapeJson(recipientName)).append("\"}],")
+                .append("\"subject\":\"").append(escapeJson(subject)).append("\",")
+                .append("\"htmlContent\":\"").append(escapeJson(htmlContent)).append("\"")
+                .append("}");
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.brevo.com/v3/smtp/email"))
+                    .header("api-key", apiKey)
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .timeout(Duration.ofSeconds(15))
+                    .POST(HttpRequest.BodyPublishers.ofString(json.toString(), StandardCharsets.UTF_8))
+                    .build();
+
+            HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                LOGGER.log(Level.INFO, "Đã gửi email OTP qua Brevo API thành công tới: {0}", recipientEmail);
+                return true;
+            } else {
+                LOGGER.log(Level.WARNING, "Brevo API trả về HTTP {0}: {1}", new Object[]{response.statusCode(), response.body()});
+                return false;
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Lỗi khi gọi Brevo API: {0}", e.getMessage());
+            return false;
+        }
+    }
+
+    private static boolean sendViaSmtp(String recipientEmail, String recipientName, String subject, String htmlBody, String senderEmail, String senderPassword) {
         try {
             Properties props = new Properties();
             props.put("mail.smtp.auth", "true");
@@ -48,20 +113,44 @@ public class EmailUtils {
             });
 
             MimeMessage message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(senderEmail, "HUSC ReFind", "UTF-8"));
+            String senderName = Constants.SENDER_NAME != null ? Constants.SENDER_NAME.trim() : "HUSC ReFind";
+            message.setFrom(new InternetAddress(senderEmail, senderName, "UTF-8"));
             message.setRecipient(Message.RecipientType.TO, new InternetAddress(recipientEmail, recipientName, "UTF-8"));
-            message.setSubject("[HUSC ReFind] Mã xác thực OTP đăng ký tài khoản: " + otpCode, "UTF-8");
-
-            String htmlBody = buildOtpEmailHtml(recipientName, otpCode);
+            message.setSubject(subject, "UTF-8");
             message.setContent(htmlBody, "text/html; charset=UTF-8");
 
             Transport.send(message);
-            LOGGER.log(Level.INFO, "Đã gửi email OTP thành công tới: {0}", recipientEmail);
+            LOGGER.log(Level.INFO, "Đã gửi email OTP qua SMTP thành công tới: {0}", recipientEmail);
             return true;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Lỗi khi gửi email OTP qua SMTP: {0}", e.getMessage());
             return false;
         }
+    }
+
+    private static String escapeJson(String s) {
+        if (s == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            switch (c) {
+                case '"': sb.append("\\\""); break;
+                case '\\': sb.append("\\\\"); break;
+                case '\b': sb.append("\\b"); break;
+                case '\f': sb.append("\\f"); break;
+                case '\n': sb.append("\\n"); break;
+                case '\r': sb.append("\\r"); break;
+                case '\t': sb.append("\\t"); break;
+                default:
+                    if (c < ' ') {
+                        String t = "000" + Integer.toHexString(c);
+                        sb.append("\\u").append(t.substring(t.length() - 4));
+                    } else {
+                        sb.append(c);
+                    }
+            }
+        }
+        return sb.toString();
     }
 
     private static String buildOtpEmailHtml(String recipientName, String otpCode) {
