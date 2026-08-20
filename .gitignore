@@ -31,5 +31,6 @@ Thumbs.db
 .env.local
 .env.*.local
 
-# Upload file
-assets/uploads/items/
+# Upload files
+web/assets/uploads/items/*
+!web/assets/uploads/items/.gitkeep
