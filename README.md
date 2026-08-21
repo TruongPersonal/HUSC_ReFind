@@ -30,4 +30,4 @@ HUSC ReFind là nền tảng web hiện đại hỗ trợ tìm kiếm, thông b�
 ## 📄 Ghi chú
 
 - Dự án này được phát triển phục vụ cho báo cáo đồ án môn học **Java nâng cao**.
-- **Sinh viên:** Ngô Quang Trường (23t1020573) - Ths. Huỳnh Bảo Quốc Dũng lớp học phần 2025-2026.3.TIN2013.001
+- **Sinh viên:** Ngô Quang Trường (23t1020573) - Ths. Huỳnh Bảo Quốc Dũng lớp học phần 2025-2026.3.TIN4013.001
